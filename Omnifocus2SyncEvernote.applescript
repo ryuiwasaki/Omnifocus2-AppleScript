@@ -1,6 +1,10 @@
 
-tell OmnifocusSyncEvernote
-	SyncEvernote() of OmnifocusSyncEvernote
+tell OmnifocusSync
+	
+	SyncEvernote() of OmnifocusSync
+	
+	display notification "OmnifocusSyncEvernote Completed." with title "Omnifocus2 Sync" subtitle "Sync to Evernote"
+	
 end tell
 
 script EvernoteNote
@@ -99,17 +103,22 @@ script OmnifocusTask
 	
 end script
 
-script OmnifocusSyncEvernote
+script OmnifocusSync
 	
 	property completedTagName : "didFinishAddOF2" as text
 	
 	on SyncEvernote()
 		
-		set r to findReminderNote("-tag:" & completedTagName) of EvernoteNote
+		tell EvernoteNote
+			set r to findReminderNote("-tag:" & completedTagName) of EvernoteNote
+		end tell
+		
 		createTaskFromNotes(r, {completedTagName})
 		
+		tell EvernoteNote
+			set t to findToDoNote("-tag:" & completedTagName) of EvernoteNote
+		end tell
 		
-		set t to findToDoNote("-tag:" & completedTagName) of EvernoteNote
 		createTaskFromNotes(t, {completedTagName})
 		
 	end SyncEvernote
@@ -126,8 +135,13 @@ script OmnifocusSyncEvernote
 			end if
 			
 			if length of ennotes > 0 then
+				
 				createOmnifocusToDoFromNotes(ennotes)
-				addTagsToNotes(ennotes, tagnames) of EvernoteNote
+				
+				tell EvernoteNote
+					addTagsToNotes(ennotes, tagnames) of EvernoteNote
+				end tell
+				
 			end if
 			
 		end if
@@ -147,7 +161,9 @@ script OmnifocusSyncEvernote
 				
 			end tell
 			
-			createOmnifocusToDo(t, h, s, e, false) of OmnifocusTask
+			tell OmnifocusTask
+				createOmnifocusToDo(t, h, s, e, false) of OmnifocusTask
+			end tell
 			
 		end repeat
 		
