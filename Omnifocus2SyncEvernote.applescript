@@ -1,44 +1,11 @@
 
-tell OmnifocusTask
-	set ot to OmnifocusTask
-	SyncEvernote() of ot
+tell OmnifocusSyncEvernote
+	SyncEvernote() of OmnifocusSyncEvernote
 end tell
 
-script OmnifocusTask
+script EvernoteNote
 	
-	property completedTagName : "didFinishAddTask" as text
-	
-	on SyncEvernote()
-		
-		set r to findReminderNote("-tag:" & completedTagName)
-		createTaskFromNotes(r, {completedTagName})
-		
-		set t to findToDoNote("-tag:" & completedTagName)
-		createTaskFromNotes(t, {completedTagName})
-		
-	end SyncEvernote
-	
-	on createTaskFromNotes(ennotes, tagnames)
-		
-		if (not (ennotes is missing value)) then
-			
-			if class of ennotes = class of {} then
-				
-			else
-				ennotes = {ennotes}
-				
-			end if
-			
-			if length of ennotes > 0 then
-				createOmnifocusToDoFromNotes(ennotes)
-				addTagsToNotes(ennotes, tagnames)
-			end if
-			
-		end if
-		
-	end createTaskFromNotes
-	
-	-- リマインダーが終わっていないノートを探す	
+	-- Search reminder Notes that have not finish.
 	-- andFilter is additional search words.
 	on findReminderNote(andFilter)
 		
@@ -47,7 +14,7 @@ script OmnifocusTask
 		
 	end findReminderNote
 	
-	-- ToDoが終わっていないノートを探す
+	-- Search todo note that contains check box more than one.
 	-- andFilter is additional search words.
 	on findToDoNote(andFilter)
 		
@@ -75,8 +42,8 @@ script OmnifocusTask
 		
 	end findENNotes
 	
-	-- ennotes is ENNote List. tagStrList is Tag name list.
 	-- Add tag to note.
+	-- ennotes is ENNote List. tagStrList is tag name list. Tag name class is text.
 	on addTagsToNotes(ennotes, tagStrList)
 		
 		tell application "Evernote"
@@ -86,6 +53,7 @@ script OmnifocusTask
 				set tagList to {}
 				repeat with t in tagStrList
 					
+					-- if tag not exists. create new tag.
 					if (not (tag named t exists)) then
 						make tag with properties {name:t}
 					end if
@@ -102,26 +70,13 @@ script OmnifocusTask
 		
 	end addTagsToNotes
 	
+end script
+
+script OmnifocusTask
 	
-	on createOmnifocusToDoFromNotes(ennotes)
-		
-		repeat with n in ennotes
-			
-			tell application "Evernote"
-				
-				set t to title of n
-				set h to HTML content of n
-				set s to current date
-				set e to reminder time of n
-				
-			end tell
-			
-			createOmnifocusToDo(t, h, s, e, false)
-			
-		end repeat
-		
-	end createOmnifocusToDoFromNotes
-	
+	-- Create task.
+	-- taskName and taskNote is text class. startDate and endDate is date class.
+	-- flags is ture or false.
 	on createOmnifocusToDo(taskName, taskNote, startDate, endDate, flags)
 		
 		if (startDate is missing value) then
@@ -143,6 +98,65 @@ script OmnifocusTask
 	end createOmnifocusToDo
 	
 end script
+
+script OmnifocusSyncEvernote
+	
+	property completedTagName : "didFinishAddOF2" as text
+	
+	on SyncEvernote()
+		
+		set r to findReminderNote("-tag:" & completedTagName) of EvernoteNote
+		createTaskFromNotes(r, {completedTagName})
+		
+		
+		set t to findToDoNote("-tag:" & completedTagName) of EvernoteNote
+		createTaskFromNotes(t, {completedTagName})
+		
+	end SyncEvernote
+	
+	on createTaskFromNotes(ennotes, tagnames)
+		
+		if (not (ennotes is missing value)) then
+			
+			if class of ennotes = class of {} then
+				
+			else
+				ennotes = {ennotes}
+				
+			end if
+			
+			if length of ennotes > 0 then
+				createOmnifocusToDoFromNotes(ennotes)
+				addTagsToNotes(ennotes, tagnames) of EvernoteNote
+			end if
+			
+		end if
+		
+	end createTaskFromNotes
+	
+	on createOmnifocusToDoFromNotes(ennotes)
+		
+		repeat with n in ennotes
+			
+			tell application "Evernote"
+				
+				set t to title of n
+				set h to HTML content of n
+				set s to current date
+				set e to reminder time of n
+				
+			end tell
+			
+			createOmnifocusToDo(t, h, s, e, false) of OmnifocusTask
+			
+		end repeat
+		
+	end createOmnifocusToDoFromNotes
+	
+end script
+
+
+
 
 
 
