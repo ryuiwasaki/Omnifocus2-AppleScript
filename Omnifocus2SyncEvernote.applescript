@@ -1,10 +1,11 @@
 
 tell OmnifocusSync
+
+	set success to SyncEvernote() of OmnifocusSync
 	
-	SyncEvernote() of OmnifocusSync
-	
-	display notification "OmnifocusSyncEvernote Completed." with title "Omnifocus2 Sync" subtitle "Sync to Evernote"
-	
+	if success then
+		display notification "OmnifocusSyncEvernote Completed." with title "Omnifocus2 Sync" subtitle "Sync to Evernote"
+	end if
 end tell
 
 script EvernoteNote
@@ -109,6 +110,8 @@ script OmnifocusSync
 	
 	on SyncEvernote()
 		
+		set success to false
+		
 		tell EvernoteNote
 			set r to findReminderNote("-tag:" & completedTagName) of EvernoteNote
 		end tell
@@ -120,6 +123,11 @@ script OmnifocusSync
 		end tell
 		
 		createTaskFromNotes(t, {completedTagName})
+		
+		if length of r > 0 then set success to true
+		if length of t > 0 then set success to true
+		
+		return success
 		
 	end SyncEvernote
 	
