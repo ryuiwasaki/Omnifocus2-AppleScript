@@ -1,6 +1,6 @@
 
 tell OmnifocusSync
-
+	
 	set success to SyncEvernote() of OmnifocusSync
 	
 	if success then
@@ -82,7 +82,7 @@ script OmnifocusTask
 	-- Create task.
 	-- taskName and taskNote is text class. startDate and endDate is date class.
 	-- flags is ture or false.
-	on createOmnifocusToDo(taskName, taskNote, startDate, endDate, flags)
+	on createOmnifocusTaskInInbox(taskName, taskNote, startDate, endDate, flags)
 		
 		if (startDate is missing value) then
 			set startDate to current date
@@ -100,7 +100,7 @@ script OmnifocusTask
 			end tell
 		end tell
 		
-	end createOmnifocusToDo
+	end createOmnifocusTaskInInbox
 	
 end script
 
@@ -163,14 +163,18 @@ script OmnifocusSync
 			tell application "Evernote"
 				
 				set t to title of n
-				set h to HTML content of n
+				
+				-- Note link and HTML content to omnifocus task note. 
+				-- Insert newline character between note link and HTML content.
+				set h to note link of n & (ASCII character (10)) & (ASCII character (10)) & HTML content of n
+				
 				set s to current date
 				set e to reminder time of n
 				
 			end tell
 			
 			tell OmnifocusTask
-				createOmnifocusToDo(t, h, s, e, false) of OmnifocusTask
+				createOmnifocusTaskInInbox(t, h, s, e, false) of OmnifocusTask
 			end tell
 			
 		end repeat
